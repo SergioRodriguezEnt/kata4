@@ -30,10 +30,10 @@ public class RemoteMovieLoader implements MovieLoader {
     }
 
     private Stream<Movie> loadFrom(URLConnection urlConnection) throws IOException {
-        return loadFrom(unzipped(urlConnection.getInputStream()));
+        return loadUsing(unzipped(urlConnection.getInputStream()));
     }
 
-    private Stream<Movie> loadFrom(InputStream is) {
+    private Stream<Movie> loadUsing(InputStream is) {
         return readFrom(readerFrom(is)).onClose(() -> close(is));
     }
 
