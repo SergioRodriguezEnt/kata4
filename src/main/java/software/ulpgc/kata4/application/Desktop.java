@@ -17,6 +17,7 @@ public class Desktop extends JFrame {
     private Desktop() {
         setTitle("Movie Histogram Display");
         setSize(800, 600);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -25,11 +26,11 @@ public class Desktop extends JFrame {
         return this;
     }
 
-    private ChartPanel chartPanelFrom(Histogram histogram) {
+    private static ChartPanel chartPanelFrom(Histogram histogram) {
         return new ChartPanel(chartFrom(histogram));
     }
 
-    private JFreeChart chartFrom(Histogram histogram) {
+    private static JFreeChart chartFrom(Histogram histogram) {
         return ChartFactory.createHistogram(
                 histogram.title(),
                 histogram.x(),
@@ -38,19 +39,19 @@ public class Desktop extends JFrame {
         );
     }
 
-    private IntervalXYDataset datasetFrom(Histogram histogram) {
+    private static IntervalXYDataset datasetFrom(Histogram histogram) {
         XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(seriesOf(histogram));
         return dataset;
     }
 
-    private XYSeries seriesOf(Histogram histogram) {
+    private static XYSeries seriesOf(Histogram histogram) {
         XYSeries series = new XYSeries(histogram.legend());
         histogram.forEach(bin -> series.add(itemFor(bin, histogram)));
         return series;
     }
 
-    private XYDataItem itemFor(int bin, Histogram histogram) {
+    private static XYDataItem itemFor(int bin, Histogram histogram) {
         return new XYDataItem(bin, histogram.count(bin));
     }
 }

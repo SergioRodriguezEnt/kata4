@@ -30,15 +30,11 @@ public class RemoteMovieLoader implements MovieLoader {
     }
 
     private Stream<Movie> loadFrom(URLConnection urlConnection) throws IOException {
-        return loadFrom(unzip(urlConnection.getInputStream()));
+        return loadFrom(unzipped(urlConnection.getInputStream()));
     }
 
     private Stream<Movie> loadFrom(InputStream is) {
-        return readFrom(new BufferedReader(new InputStreamReader(is), bufferSize)).onClose(() -> close(is));
-    }
-
-    private InputStream unzip(InputStream inputStream) throws IOException {
-        return new GZIPInputStream(new BufferedInputStream(inputStream, bufferSize));
+        return readFrom(readerFrom(is)).onClose(() -> close(is));
     }
 
     private Stream<Movie> readFrom(BufferedReader reader) {
@@ -47,7 +43,15 @@ public class RemoteMovieLoader implements MovieLoader {
                 .map(deserializer);
     }
 
-    private void close(InputStream is) {
+    private static BufferedReader readerFrom(InputStream is) {
+        return new BufferedReader(new InputStreamReader(is), bufferSize);
+    }
+
+    private static InputStream unzipped(InputStream inputStream) throws IOException {
+        return new GZIPInputStream(new BufferedInputStream(inputStream, bufferSize));
+    }
+
+    private static void close(InputStream is) {
         try {
             is.close();
         } catch (IOException e) {

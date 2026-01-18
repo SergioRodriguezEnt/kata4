@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class Main {
     static void main() {
         Stream<Movie> movies = new RemoteMovieLoader(Movie::fromTsp).loadAll()
-                .filter(m -> m.year()>1980)
+                .filter(m -> m.year()>1900)
                 .filter(m -> m.year()<2025)
                 .limit(10_000);
 
