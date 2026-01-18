@@ -4,7 +4,6 @@ import software.ulpgc.kata4.architecture.viewmodel.Histogram;
 import software.ulpgc.kata4.architecture.viewmodel.HistogramBuilder;
 import software.ulpgc.kata4.architecture.model.Movie;
 
-
 import java.util.stream.Stream;
 
 public class Main {
@@ -20,5 +19,9 @@ public class Main {
                 .y("Frequency")
                 .legend("Movies")
                 .build(Movie::year);
+
+        Desktop.create()
+                .display(histogram)
+                .setVisible(true);
     }
 }

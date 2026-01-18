@@ -1,0 +1,56 @@
+package software.ulpgc.kata4.application;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.*;
+import software.ulpgc.kata4.architecture.viewmodel.Histogram;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class Desktop extends JFrame {
+    public static Desktop create() {
+        return new Desktop();
+    }
+
+    private Desktop() {
+        setTitle("Movie Histogram Display");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public Desktop display(Histogram histogram) {
+        add(chartPanelFrom(histogram));
+        return this;
+    }
+
+    private ChartPanel chartPanelFrom(Histogram histogram) {
+        return new ChartPanel(chartFrom(histogram));
+    }
+
+    private JFreeChart chartFrom(Histogram histogram) {
+        return ChartFactory.createHistogram(
+                histogram.title(),
+                histogram.x(),
+                histogram.y(),
+                datasetFrom(histogram)
+        );
+    }
+
+    private IntervalXYDataset datasetFrom(Histogram histogram) {
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(seriesOf(histogram));
+        return dataset;
+    }
+
+    private XYSeries seriesOf(Histogram histogram) {
+        XYSeries series = new XYSeries(histogram.legend());
+        histogram.forEach(bin -> series.add(itemFor(bin, histogram)));
+        return series;
+    }
+
+    private XYDataItem itemFor(int bin, Histogram histogram) {
+        return new XYDataItem(bin, histogram.count(bin));
+    }
+}
