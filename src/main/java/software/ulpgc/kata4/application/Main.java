@@ -4,14 +4,21 @@ import software.ulpgc.kata4.architecture.viewmodel.Histogram;
 import software.ulpgc.kata4.architecture.viewmodel.HistogramBuilder;
 import software.ulpgc.kata4.architecture.model.Movie;
 
-import java.util.List;
+
+import java.util.stream.Stream;
 
 public class Main {
     static void main() {
-        List<Movie> movies = new RemoteMovieLoader().loadAll();
-        Histogram histogram = new HistogramBuilder(movies).build(Movie::year);
-        for (Integer bin : histogram) {
-            System.out.println(bin + ": " + histogram.count(bin));
-        }
+        Stream<Movie> movies = new RemoteMovieLoader(Movie::fromTsp).loadAll()
+                .filter(m -> m.year()>1980)
+                .filter(m -> m.year()<2025)
+                .limit(10_000);
+
+        Histogram histogram = HistogramBuilder.with(movies)
+                .title("Movies per year")
+                .x("Year")
+                .y("Frequency")
+                .legend("Movies")
+                .build(Movie::year);
     }
 }

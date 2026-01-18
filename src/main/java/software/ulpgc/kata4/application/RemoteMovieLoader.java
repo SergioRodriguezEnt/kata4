@@ -7,15 +7,21 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public class RemoteMovieLoader implements MovieLoader {
     private static final String url = "https://datasets.imdbws.com/title.basics.tsv.gz";
     private static final int bufferSize = 1024;
+    private final Function<String, Movie> deserializer;
+
+    public RemoteMovieLoader(Function<String, Movie> fromTsp) {
+        deserializer = fromTsp;
+    }
 
     @Override
-    public List<Movie> loadAll() {
+    public Stream<Movie> loadAll() {
         try {
             return loadFrom(new URI(url).toURL().openConnection());
         } catch (IOException | URISyntaxException e) {
@@ -23,31 +29,29 @@ public class RemoteMovieLoader implements MovieLoader {
         }
     }
 
-    private List<Movie> loadFrom(URLConnection urlConnection) throws IOException {
-        try (BufferedReader reader = readerFrom(urlConnection.getInputStream())) {
-            return readFrom(reader);
-        }
+    private Stream<Movie> loadFrom(URLConnection urlConnection) throws IOException {
+        return loadFrom(unzip(urlConnection.getInputStream()));
     }
 
-    private List<Movie> readFrom(BufferedReader reader) throws IOException {
-        reader.readLine();
-        return reader.lines().map(line -> movieFrom(line.split("\t"))).toList();
-    }
-
-    private Movie movieFrom(String[] split) {
-        return new Movie(split[2], toInt(split[5]), toInt(split[7]));
-    }
-
-    private int toInt(String s) {
-        if (s.equals("\\N")) return -1;
-        return Integer.parseInt(s);
-    }
-
-    private BufferedReader readerFrom(InputStream inputStream) throws IOException {
-        return new BufferedReader(new InputStreamReader(unzip(inputStream)), bufferSize);
+    private Stream<Movie> loadFrom(InputStream is) {
+        return readFrom(new BufferedReader(new InputStreamReader(is), bufferSize)).onClose(() -> close(is));
     }
 
     private InputStream unzip(InputStream inputStream) throws IOException {
         return new GZIPInputStream(new BufferedInputStream(inputStream, bufferSize));
+    }
+
+    private Stream<Movie> readFrom(BufferedReader reader) {
+        return reader.lines()
+                .skip(1)
+                .map(deserializer);
+    }
+
+    private void close(InputStream is) {
+        try {
+            is.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

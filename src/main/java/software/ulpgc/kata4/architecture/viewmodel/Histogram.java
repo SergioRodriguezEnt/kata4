@@ -6,8 +6,10 @@ import java.util.Map;
 
 public class Histogram implements Iterable<Integer> {
     private final Map<Integer, Integer> map;
+    private final Map<String, String> labels;
 
-    public Histogram() {
+    public Histogram(Map<String, String> labels) {
+        this.labels = labels;
         this.map = new HashMap<>();
     }
 
@@ -17,6 +19,22 @@ public class Histogram implements Iterable<Integer> {
 
     public int count(int bin) {
         return map.getOrDefault(bin, 0);
+    }
+
+    public String title() {
+        return labels.get("title");
+    }
+
+    public String x() {
+        return labels.get("x");
+    }
+
+    public String y() {
+        return labels.get("y");
+    }
+
+    public String legend() {
+        return labels.get("legend");
     }
 
     @Override
